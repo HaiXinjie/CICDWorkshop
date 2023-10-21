@@ -19,8 +19,16 @@ jobs:
         with:
           regex: '^(?!#NORUN)'
 
+  trivy-scan:
+    runs-on: ubuntu-latest
+    name: trivy-scan vulnerability 
+    needs: commit-message
+    if: success()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Run Trivy vulnerability scanner in repo mode
-        if: #steps.trivy.outputs.exit-code == '1'       如果commit check失败了，执行下面的代码
         id: trivy
         uses: aquasecurity/trivy-action@master
         with:
@@ -28,10 +36,14 @@ jobs:
           ignore-unfixed: true
           format: 'table'
           output: 'trivy-report.txt'
-          exit-code: '1'        ## when severity is critical ,exit-code is 1
           severity: CRITICAL  
          
-    
+  failed-trivy-scan:
+    runs-on: ubuntu-latest
+    name: slack send failed trivy scan vulnerability
+    needs: trivy-scan
+    if: failure()
+    steps:
       - name: Trivy failed slack send notification
         if: steps.trivy.outputs.exit-code == '1'
         id: slack
@@ -45,11 +57,13 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-
+    needs: trivy-scan
+    if: success()
+    
     permissions:
       contents: read
       packages: write
-      id-token: write # needed for signing
+      id-token: write 
 
     steps:
       - name: Set up QEMU
@@ -69,7 +83,7 @@ jobs:
         id: build-and-push
         with:
           push: true
-          tags: willhit/go-fortune:${{ github.sha }} ## need change
+          tags: jinshouwuxian/go-fortune:${{ github.sha }} 
           
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.1.1
