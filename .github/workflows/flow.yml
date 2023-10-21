@@ -45,7 +45,6 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    if: jobs.run_trivy.outputs.exit-code == '0'
 
     permissions:
       contents: read
