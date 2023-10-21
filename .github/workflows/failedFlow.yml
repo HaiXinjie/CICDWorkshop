@@ -46,11 +46,16 @@ jobs:
     if: failure()
     steps:
       - name: Trivy failed slack send notification
-        if: steps.trivy.outputs.exit-code == '1'
-        id: slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          payload-file-path: ${{ steps.trivy.outputs.output }}
+          payload: |
+            {
+              "Ref": ${{ github.ref }}
+              "Event": ${{ github.event_name }}
+              "Actions URL": ${{ github.run_url }}
+              "Commit": ${{ github.sha }}
+              "Scan Failed - Hai xinjie": "Failed trivy scan, see uploaded report"
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
