@@ -50,10 +50,10 @@ jobs:
         with:
           payload: |
             {
-              "Ref": ${{ github.ref }}
-              "Event": ${{ github.event_name }}
-              "Actions URL": ${{ github.run_url }}
-              "Commit": ${{ github.sha }}
+              "Ref": ${{ github.ref }},
+              "Event": ${{ github.event_name }},
+              "Actions URL": ${{ github.run_url }},
+              "Commit": ${{ github.sha }},
               "Scan Failed - Hai xinjie": "Failed trivy scan, see uploaded report"
             }
         env:
