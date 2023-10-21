@@ -1,5 +1,5 @@
-# action name
-name: test-github-workflows
+
+name: CICDWorkshop-success
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
       - 'v[0-9]+.[0-9]+'
 
 jobs:
-# https://dev.to/harisharavindan/github-action-for-commit-message-validation-5b36 use markplace action
   commit-message:
     runs-on: ubuntu-latest
     name: commit-message-validation
@@ -18,7 +17,7 @@ jobs:
       - id: commit_check
         uses: uptownaravi/verify-commit-message-action@v2
         with:
-          regex: '#NORUN(.*)'
+          regex: '^(?!#NORUN)'
 
       - name: Run Trivy vulnerability scanner in repo mode
         if: #steps.trivy.outputs.exit-code == '1'       如果commit check失败了，执行下面的代码
