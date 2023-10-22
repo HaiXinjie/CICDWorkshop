@@ -48,7 +48,7 @@ jobs:
       - name: Trivy failed slack send notification
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_CHANNEL: general
+          SLACK_CHANNEL: C05QWSVMH0S
           SLACK_COLOR: ${{ job.status }} 
           SLACK_MESSAGE: 'Scan failed-Hai Xinjie'
           SLACK_TITLE: Scan failed
@@ -110,7 +110,7 @@ jobs:
         id: slack_success
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          channel-id: "CHANNEL_ID" ## chenage channel id
+          channel-id: "CHANNEL_ID" 
           payload: |
             {
               "Name": "Hai Xinjie",
