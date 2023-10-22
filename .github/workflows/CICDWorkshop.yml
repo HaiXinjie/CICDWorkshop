@@ -70,16 +70,13 @@ jobs:
         with:
           name: 'mytrivy-report.txt'
 
-      - name: test cat a file
-        run: cat mytrivy-report.txt
-
       - name: slack send Trivy reports
         uses: MeilCli/slack-upload-file@v3
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
-          channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+          channel_id: C05R666T281
           file_path: 'mytrivy-report.txt' 
-          initial_comment: 'Scan report by Hai Xinjie'
+          initial_comment: 'Scan report by HaiXinjie'
 
 
   docker:
