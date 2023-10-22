@@ -53,7 +53,7 @@ jobs:
   #   if: failure()
   #   steps:
       - name: Trivy failed slack send notification
-        # if: steps.trivy.conclusion == 'failure'
+        if: steps.trivy.outputs.exit-code == '1'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -69,7 +69,7 @@ jobs:
       #     name: my Trivy vulnerability scanner
 
       - name: slack send Trivy reports
-        # if: steps.trivy.conclusion == 'failure'
+        if: steps.trivy.outputs.exit-code == '1'
         uses: MeilCli/slack-upload-file@v3
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
