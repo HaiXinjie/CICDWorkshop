@@ -47,13 +47,13 @@ jobs:
     steps:
       - name: Trivy failed slack send notification
         uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_CHANNEL: general
-        SLACK_COLOR: ${{ job.status }} 
-        SLACK_MESSAGE: 'Scan failed-Hai Xinjie'
-        SLACK_TITLE: Scan failed
-        SLACK_USERNAME: CICD
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        env:
+          SLACK_CHANNEL: general
+          SLACK_COLOR: ${{ job.status }} 
+          SLACK_MESSAGE: 'Scan failed-Hai Xinjie'
+          SLACK_TITLE: Scan failed
+          SLACK_USERNAME: CICD
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
 
