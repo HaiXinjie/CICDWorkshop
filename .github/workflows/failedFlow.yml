@@ -1,5 +1,5 @@
 
-name: CICDWorkshop-failed
+name: CICDWorkshop
 
 on:
   push:
@@ -38,6 +38,13 @@ jobs:
           output: 'trivy-report.txt'
           exit-code: "1"
           severity: HIGH  
+          # severity: CRITICAL  
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my Trivy vulnerability scanner
+          path: 'trivy-report.txt'
          
   failed-trivy-scan:
     runs-on: ubuntu-latest
@@ -48,12 +55,28 @@ jobs:
       - name: Trivy failed slack send notification
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_CHANNEL: C05RLJ1VDLY
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
           SLACK_COLOR: ${{ job.status }} 
-          SLACK_MESSAGE: 'Scan failed-Hai Xinjie'
-          SLACK_TITLE: Scan failed
+          SLACK_MESSAGE: 'Failed trivy scan,see uploaded report'
+          SLACK_TITLE: Scan failed - Hai Xinjie
           SLACK_USERNAME: CICD
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: my Trivy vulnerability scanner
+
+      - name: slack send Trivy reports
+        uses: MeilCli/slack-upload-file@v3
+        with:
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+          content: 'file content'
+          file_type: 'text'
+          file_name: 'trivy-report.txt' 
+          title: 'trivy-report'
+          initial_comment: 'Scan report by Hai Xinjie'
 
 
 
@@ -108,30 +131,18 @@ jobs:
 
       - name: send slack
         id: slack_success
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: "CHANNEL_ID" 
-          payload: |
-            {
-              "Name": "Hai Xinjie",
-              "attachments": [
-                {
-                  "Matriculation number": "test",
-                  "Email": "dbab09",
-                  "fields": [
-                    {
-                      "Name": "ab",
-                      "Matriculation number": "test",
-                      "Email": abc@gmail.com,
-                      "Repository": "In Progress",
-                      "Docker Hub URL": "https://docker.com"
-                    }
-                  ]
-                }
-              ]
-            }
-
+        uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_COLOR: ${{ job.status }} 
+          SLACK_MESSAGE: |
+            Name: Haixinjie
+            Metriculation: e1221479
+            Email: e1221479@u.nus.edu
+            Repository: https://github.com/${{ github.repository }}
+            Docker Hub URL:  ${{ secrets.DOCKERHUB_URL }}
+          SLACK_TITLE: 'Image build and signed'
+          SLACK_USERNAME: 'DipSA 57 CICD'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 
