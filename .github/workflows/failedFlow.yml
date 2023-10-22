@@ -46,18 +46,14 @@ jobs:
     if: failure()
     steps:
       - name: Trivy failed slack send notification
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "Ref": ${{ github.ref }},
-              "Event": ${{ github.event_name }},
-              "Actions URL": ${{ github.run_url }},
-              "Commit": ${{ github.sha }},
-              "Scan Failed - Hai xinjie": "Failed trivy scan, see uploaded report"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: general
+        SLACK_COLOR: ${{ job.status }} 
+        SLACK_MESSAGE: 'Scan failed-Hai Xinjie'
+        SLACK_TITLE: Scan failed
+        SLACK_USERNAME: CICD
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
 
