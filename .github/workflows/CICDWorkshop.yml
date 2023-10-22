@@ -36,23 +36,24 @@ jobs:
           ignore-unfixed: true
           format: 'table'
           output: 'trivy-report.txt'
-          # exit-code: "1"
-          # severity: HIGH  
-          severity: CRITICAL  
+          exit-code: "1"
+          severity: HIGH  
+          # severity: CRITICAL  
       
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: my Trivy vulnerability scanner
-          path: 'trivy-report.txt'
+      # - name: Upload Artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: my Trivy vulnerability scanner
+      #     path: 'trivy-report.txt'
          
-  failed-trivy-scan:
-    runs-on: ubuntu-latest
-    name: slack send failed trivy scan vulnerability
-    needs: trivy-scan
-    if: failure()
-    steps:
+  # failed-trivy-scan:
+  #   runs-on: ubuntu-latest
+  #   name: slack send failed trivy scan vulnerability
+  #   needs: trivy-scan
+  #   if: failure()
+  #   steps:
       - name: Trivy failed slack send notification
+        if: steps.trivy.conclusion == 'failure'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -62,12 +63,13 @@ jobs:
           SLACK_USERNAME: CICD
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: my Trivy vulnerability scanner
+      # - name: Download Artifact
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: my Trivy vulnerability scanner
 
       - name: slack send Trivy reports
+        if: steps.trivy.conclusion == 'failure'
         uses: MeilCli/slack-upload-file@v3
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
