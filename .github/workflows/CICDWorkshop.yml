@@ -39,6 +39,7 @@ jobs:
           exit-code: "1"
           severity: HIGH  
           # severity: CRITICAL  
+        continue-on-error: true
       
       # - name: Upload Artifact
       #   uses: actions/upload-artifact@v2
@@ -53,7 +54,7 @@ jobs:
   #   if: failure()
   #   steps:
       - name: Trivy failed slack send notification
-        if: steps.trivy.outputs.exit-code == '1'
+        if: failure()
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
@@ -62,6 +63,7 @@ jobs:
           SLACK_TITLE: Scan failed - Hai Xinjie
           SLACK_USERNAME: CICD
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: exit 1
 
       # - name: Download Artifact
       #   uses: actions/download-artifact@v2
@@ -69,7 +71,7 @@ jobs:
       #     name: my Trivy vulnerability scanner
 
       - name: slack send Trivy reports
-        if: steps.trivy.outputs.exit-code == '1'
+        if: failure()
         uses: MeilCli/slack-upload-file@v3
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
@@ -79,6 +81,7 @@ jobs:
           file_name: 'trivy-report.txt' 
           title: 'trivy-report'
           initial_comment: 'Scan report by Hai Xinjie'
+        run: exit 1
 
 
 
