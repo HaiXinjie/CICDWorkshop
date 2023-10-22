@@ -46,7 +46,7 @@ jobs:
     if: failure()
     steps:
       - name: Trivy failed slack send notification
-      - uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_CHANNEL: general
         SLACK_COLOR: ${{ job.status }} 
