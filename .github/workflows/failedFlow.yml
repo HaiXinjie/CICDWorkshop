@@ -48,7 +48,7 @@ jobs:
       - name: Trivy failed slack send notification
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_CHANNEL: C05QWSVMH0S
+          SLACK_CHANNEL: C05RLJ1VDLY
           SLACK_COLOR: ${{ job.status }} 
           SLACK_MESSAGE: 'Scan failed-Hai Xinjie'
           SLACK_TITLE: Scan failed
