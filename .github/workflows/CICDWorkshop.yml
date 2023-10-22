@@ -76,7 +76,6 @@ jobs:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
           file_path: 'mytrivy-report.txt'
-          file_path_follow_symbolic_links: false
           initial_comment: 'Scan report by HaiXinjie'
 
 
