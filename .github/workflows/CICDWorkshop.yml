@@ -1,0 +1,150 @@
+
+name: CICDWorkshop
+
+on:
+  push:
+    branches:
+      - 'v[0-9]+.[0-9]+'
+
+jobs:
+  commit-message:
+    runs-on: ubuntu-latest
+    name: commit-message-validation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - id: commit_check
+        uses: uptownaravi/verify-commit-message-action@v2
+        with:
+          regex: '^(?!#NORUN)'
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    name: trivy-scan vulnerability 
+    needs: commit-message
+    if: success()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        id: trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          output: 'trivy-report.txt'
+          exit-code: "1"
+          severity: HIGH  
+          # severity: CRITICAL  
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my Trivy vulnerability scanner
+          path: 'trivy-report.txt'
+         
+  failed-trivy-scan:
+    runs-on: ubuntu-latest
+    name: slack send failed trivy scan vulnerability
+    needs: trivy-scan
+    if: failure()
+    steps:
+      - name: Trivy failed slack send notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_COLOR: ${{ job.status }} 
+          SLACK_MESSAGE: 'Failed trivy scan,see uploaded report'
+          SLACK_TITLE: Scan failed - Hai Xinjie
+          SLACK_USERNAME: CICD
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: my Trivy vulnerability scanner
+
+      - name: slack send Trivy reports
+        uses: MeilCli/slack-upload-file@v3
+        with:
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+          content: 'file content'
+          file_type: 'text'
+          file_name: 'trivy-report.txt' 
+          title: 'trivy-report'
+          initial_comment: 'Scan report by Hai Xinjie'
+
+
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: trivy-scan
+    if: success()
+    
+    permissions:
+      contents: read
+      packages: write
+      id-token: write 
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        id: build-and-push
+        with:
+          push: true
+          tags: jinshouwuxian/go-fortune:${{ github.sha }} 
+          
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.1.1
+
+      - name: Sign image with a key
+        run: |
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
+        env:
+          TAGS: ${{ github.sha }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+
+      - name: Sign the images with GitHub OIDC Token
+        env:
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          TAGS: ${{ github.sha }}
+        run: cosign sign --yes "${TAGS}@${DIGEST}"
+
+
+      - name: send slack
+        id: slack_success
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_COLOR: ${{ job.status }} 
+          SLACK_MESSAGE: |
+            Name: Haixinjie
+            Metriculation: e1221479
+            Email: e1221479@u.nus.edu
+            Repository: https://github.com/${{ github.repository }}
+            Docker Hub URL:  ${{ secrets.DOCKERHUB_URL }}
+          SLACK_TITLE: 'Image build and signed'
+          SLACK_USERNAME: 'DipSA 57 CICD'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
