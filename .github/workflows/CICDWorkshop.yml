@@ -1,6 +1,6 @@
 
 name: CICDWorkshop
-# afnanfuenfia
+
 on:
   push:
     branches:
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     name: slack send failed trivy scan vulnerability
     needs: trivy-scan
-    if: failure()
+    if: needs.trivy-scan.result == 'failure'
     steps:
       - name: Trivy failed slack send notification
         uses: rtCamp/action-slack-notify@v2
