@@ -24,8 +24,8 @@ jobs:
           format: 'table'
           output: 'mytrivy-report.txt'
           exit-code: "1"
-          severity: HIGH  
-          #severity: CRITICAL  
+          # severity: HIGH  
+          severity: CRITICAL  
 
       
       - name: Upload Artifact
